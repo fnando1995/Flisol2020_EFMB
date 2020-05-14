@@ -19,44 +19,32 @@ def put_tracked_in_frame(tracked,frame):
     return frame
 
 class Tracker(object):
-    def __init__(self,THRESH,MatrixOPeration,AssigProblemSolver,FPS = 10):
-        self.algorithm              =   Sort(THRESH,MatrixOPeration,AssigProblemSolver)
+    def __init__(self,THRESH,FPS = 10):
+        self.algorithm              =   Sort(THRESH)
         self.tracked_detections     =   []
-        self.tracks_time_thresh     =   2.0     # seconds
         self.video_fps              =   FPS
-        self.tracked_frames_number  =   0   # [sum of seconds,number of tracks],
-                                            # I will be using a threshold for avoiding
-                                            # tends to zero with false negatives detections
+        self.total_counts           =   0
+
 
     def reset_tracks(self):
         self.tracked_detections =   []
 
 
-    def track_dets(self,dets,frame,client):
+    def track_dets(self,dets,frame):
+        """
+        param dets: [x1,y1,x2,y2,conf,class]
+        :param frame:
+        :return:
+        """
         new_tracked_detections,erased_trks = self.algorithm.update(dets,self.tracked_detections)
-        self.analize_tracks(new_tracked_detections,erased_trks,client)
+        # Algoritmo ultra-mega-simplista-jamas-recomendado-para-conteo.
+        for erased in erased_trks:
+            if erased.get_age()/self.video_fps > 2.0:
+                self.total_counts += 1
         self.tracked_detections = new_tracked_detections
-        return put_tracked_in_frame(self.tracked_detections,frame)
+        return put_tracked_in_frame(self.tracked_detections,frame),self.total_counts
 
-    def analize_tracks(self,new_tracks,erased_tracks,client):
-        if len(erased_tracks)!=0:
-            for erased in erased_tracks:
-                frames_count = erased.get_age()
-                seconds = frames_count/self.video_fps
-                if seconds > self.tracks_time_thresh:
-                    self.tracked_frames_number += frames_count
-                    average_time = self.tracked_frames_number/self.video_fps
-                    client.publish("person/duration", json.dumps({"duration": average_time}))
-                # e = erased.get_time_in_seconds()
-                # if e > self.tracks_time_thresh:
-                #     self.tracked_times[0] += e
-                #     self.tracked_times[1] += 1
-                #     average_time = self.tracked_times[0]#/self.tracked_times[1]
-                #     client.publish("person/duration", json.dumps({"duration": average_time}))
-        if len(self.tracked_detections) != new_tracks:
-            total_counts = len(new_tracks)
-            # print(total_counts)
-            client.publish("person", json.dumps({"count": total_counts}))
+
 
 
 
