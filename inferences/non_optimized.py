@@ -9,7 +9,6 @@ class Network():
     model_path = BASE_DIR + "/modelos/ssd_mobilenet_v2_coco/models/mobilenet-v1-ssd-mp-0_675.pth"
     label_path = BASE_DIR + "/modelos/ssd_mobilenet_v2_coco/models/voc-model-labels.txt"
 
-
     def __init__(self):
         self.class_names = [name.strip() for name in open(self.label_path).readlines()]
         self.num_classes = len(self.class_names)
@@ -19,7 +18,9 @@ class Network():
 
     def predict(self,image,prob,return_image=True,top_k=-1):
         boxes, labels, probs = self.predictor.predict(image, top_k, prob) #top_k: if -1 keeps all
+        # [[x1,y1,x2,y2,0,0.99],[...]]
         detections = []
+
         for b,l,p in zip(boxes,labels,probs):
             detections.append([ int(i) for i in list(b)]+[int(l)]+[round(float(p),4)])
 

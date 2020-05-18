@@ -32,7 +32,7 @@ class Tracker(object):
 
     def track_dets(self,dets,frame):
         """
-        param dets: [x1,y1,x2,y2,conf,class]
+        param dets: [x1,y1,x2,y2,class],conf]
         :param frame:
         :return:
         """

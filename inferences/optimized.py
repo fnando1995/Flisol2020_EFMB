@@ -146,8 +146,8 @@ class Network:
         h,w = self.input_shape[2:]
         img_h, img_w = frame.shape[:2]
         dets = filter(perform_inference(self.exec_net, frame, h, w), img_h, img_w,dets_confidence)
-        # output = put_in_frame(dets,frame)
-        return dets
+        output = put_in_frame(dets,frame)
+        return dets#,output
 
 
     def execute_net_asyn(self,frame,request_id):
